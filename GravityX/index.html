@@ -1,0 +1,761 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Космическа гравитация</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@400;500;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #03040c;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.interface {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(19px, 3vw, 34px);
+  letter-spacing: 3px;
+  color: #fff;
+  text-shadow: 0 0 22px #00d9ff80;
+}
+
+.subtitle {
+  color: #8d9bb8;
+  font-size: 12px;
+  margin-top: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.status {
+  color: #63ffd4;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border: 1px solid #63ffd455;
+  background: #071b2088;
+  padding: 10px 14px;
+  border-radius: 30px;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #63ffd4;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 10px #63ffd4;
+}
+
+.panel {
+  pointer-events: auto;
+  width: min(340px, calc(100vw - 35px));
+  padding: 22px;
+  background: linear-gradient(145deg, #10162be8, #080b18e8);
+  border: 1px solid #6277a633;
+  border-radius: 18px;
+  box-shadow: 0 15px 60px #0008, inset 0 0 25px #5d72ff08;
+  backdrop-filter: blur(18px);
+}
+
+.panel h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #9aa9c9;
+  margin-bottom: 16px;
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  color: #9eaccb;
+  background: #171d31;
+  border: 1px solid #38415e;
+  padding: 12px 8px;
+  border-radius: 9px;
+  font-size: 12px;
+  transition: .25s;
+}
+
+button:hover {
+  border-color: #00d9ff;
+  color: white;
+}
+
+button.active {
+  color: #fff;
+  background: #073a50;
+  border-color: #00d9ff;
+  box-shadow: 0 0 18px #00d9ff20;
+}
+
+.control {
+  margin: 20px 0;
+}
+
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #aeb9d2;
+  margin-bottom: 12px;
+}
+
+.control-label span:last-child {
+  color: #58eaff;
+  font-family: 'Orbitron', sans-serif;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #00d9ff;
+  cursor: pointer;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.stat {
+  background: #ffffff06;
+  border: 1px solid #ffffff0d;
+  padding: 13px;
+  border-radius: 10px;
+}
+
+.stat small {
+  color: #7987a7;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.stat strong {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 19px;
+  margin-top: 7px;
+  color: #fff;
+}
+
+.bottom {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.hint {
+  color: #8795b2;
+  font-size: 12px;
+  line-height: 1.8;
+  text-shadow: 0 2px 8px #000;
+}
+
+.hint b {
+  color: #53eaff;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.actions button {
+  min-width: 80px;
+}
+
+@media (max-width: 600px) {
+  .interface {
+    padding: 17px;
+  }
+
+  .subtitle {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  .status {
+    font-size: 9px;
+    padding: 8px;
+  }
+
+  .panel {
+    padding: 16px;
+    width: min(310px, calc(100vw - 34px));
+  }
+
+  .panel h2 {
+    margin-bottom: 10px;
+  }
+
+  .control {
+    margin: 13px 0;
+  }
+
+  .stat {
+    padding: 9px;
+  }
+
+  .stat strong {
+    font-size: 16px;
+  }
+
+  .hint {
+    font-size: 10px;
+    max-width: 48%;
+  }
+
+  .actions button {
+    min-width: 60px;
+    font-size: 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="space"></canvas>
+
+<div class="interface">
+
+  <header>
+    <div>
+      <h1>GRAVITY<span style="color:#00d9ff">X</span></h1>
+      <div class="subtitle">Интерактивна космическа лаборатория</div>
+    </div>
+    <div class="status" id="status">СИСТЕМА АКТИВНА</div>
+  </header>
+
+  <div class="panel">
+    <h2>◈ КОНТРОЛЕН ЦЕНТЪР</h2>
+
+    <div class="modes">
+      <button class="active" id="orbitBtn">✦ Орбита</button>
+      <button id="blackBtn">◉ Черна дупка</button>
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Гравитация</span>
+        <span id="gravityValue">75%</span>
+      </div>
+      <input id="gravity" type="range" min="10" max="150" value="75">
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Скорост на частиците</span>
+        <span id="speedValue">100%</span>
+      </div>
+      <input id="speed" type="range" min="20" max="200" value="100">
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Брой частици</span>
+        <span id="countValue">1800</span>
+      </div>
+      <input id="count" type="range" min="300" max="3000" step="100" value="1800">
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <small>ЧАСТИЦИ</small>
+        <strong id="particleStat">1800</strong>
+      </div>
+      <div class="stat">
+        <small>FPS</small>
+        <strong id="fps">60</strong>
+      </div>
+      <div class="stat">
+        <small>РЕЖИМ</small>
+        <strong id="modeStat" style="font-size:14px">ORBIT</strong>
+      </div>
+      <div class="stat">
+        <small>ЕНЕРГИЯ</small>
+        <strong id="energy">100%</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="hint">
+      <b>УПРАВЛЕНИЕ</b><br>
+      Движи мишката, за да огъваш пространството.<br>
+      Задръж клик за активиране на черна дупка.
+    </div>
+
+    <div class="actions">
+      <button id="pauseBtn">Ⅱ Пауза</button>
+      <button id="resetBtn">↻ Рестарт</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById('space');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+let W, H, cx, cy;
+let particles = [];
+let running = true;
+let blackHole = false;
+let mode = 'orbit';
+let gravity = 0.75;
+let speedFactor = 1;
+let targetCount = 1800;
+let frame = 0;
+let lastTime = performance.now();
+let fps = 60;
+let time = 0;
+
+const pointer = {
+  x: 0,
+  y: 0,
+  active: false
+};
+
+const rand = (a, b) => Math.random() * (b - a) + a;
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  W = window.innerWidth;
+  H = window.innerHeight;
+  cx = W / 2;
+  cy = H / 2;
+
+  canvas.width = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#03040c';
+  ctx.fillRect(0, 0, W, H);
+
+  if (!pointer.active) {
+    pointer.x = cx;
+    pointer.y = cy;
+  }
+}
+
+class Particle {
+  constructor() {
+    this.reset(true);
+  }
+
+  reset(randomPosition = false) {
+    const angle = rand(0, Math.PI * 2);
+    const maxRadius = Math.hypot(W, H) * 0.65;
+    const radius = randomPosition
+      ? Math.sqrt(Math.random()) * maxRadius
+      : rand(50, maxRadius);
+
+    this.x = cx + Math.cos(angle) * radius;
+    this.y = cy + Math.sin(angle) * radius * 0.65;
+
+    this.vx = rand(-0.5, 0.5);
+    this.vy = rand(-0.5, 0.5);
+
+    this.size = rand(0.5, 2.1);
+    this.hue = rand(175, 285);
+    this.alpha = rand(0.35, 0.95);
+    this.mass = rand(0.6, 1.5);
+    this.phase = rand(0, Math.PI * 2);
+    this.trail = Math.random() > 0.75;
+  }
+
+  update(dt) {
+    const tx = pointer.x;
+    const ty = pointer.y;
+
+    const dx = tx - this.x;
+    const dy = ty - this.y;
+    const distSq = dx * dx + dy * dy + 100;
+    const dist = Math.sqrt(distSq);
+
+    const nx = dx / dist;
+    const ny = dy / dist;
+
+    const maxForce = blackHole ? 5 : 1.5;
+    const force = Math.min(
+      maxForce,
+      (gravity * 170) / distSq
+    );
+
+    if (blackHole) {
+      // Силно привличане към сингулярността
+      this.vx += nx * force * 1.7 * dt;
+      this.vy += ny * force * 1.7 * dt;
+
+      // Спирално движение около черната дупка
+      this.vx += -ny * force * 0.3 * dt;
+      this.vy += nx * force * 0.3 * dt;
+    } else {
+      // Гравитационно привличане и орбитално движение
+      this.vx += nx * force * 0.45 * dt;
+      this.vy += ny * force * 0.45 * dt;
+
+      const orbitalForce = Math.min(0.12, 30 / (dist + 80));
+      this.vx += -ny * orbitalForce * gravity * dt;
+      this.vy += nx * orbitalForce * gravity * dt;
+    }
+
+    // Леко въртене около галактическия център
+    const gx = cx - this.x;
+    const gy = cy - this.y;
+    const gd = Math.hypot(gx, gy) + 1;
+
+    this.vx += (-gy / gd) * 0.012 * dt;
+    this.vy += (gx / gd) * 0.012 * dt;
+
+    // Триене и контрол на скоростта
+    const drag = Math.pow(0.992, dt);
+    this.vx *= drag;
+    this.vy *= drag;
+
+    const maxSpeed = blackHole ? 12 : 4.5;
+    const velocity = Math.hypot(this.vx, this.vy);
+
+    if (velocity > maxSpeed) {
+      this.vx = this.vx / velocity * maxSpeed;
+      this.vy = this.vy / velocity * maxSpeed;
+    }
+
+    this.x += this.vx * speedFactor * dt;
+    this.y += this.vy * speedFactor * dt;
+
+    // Поглъщане от черната дупка и повторно използване
+    if (blackHole && dist < 12) {
+      this.reset(false);
+    }
+
+    const margin = 100;
+
+    if (
+      this.x < -margin || this.x > W + margin ||
+      this.y < -margin || this.y > H + margin
+    ) {
+      this.reset(false);
+    }
+  }
+
+  draw() {
+    const pulse = 0.7 + Math.sin(time * 0.003 + this.phase) * 0.3;
+    const alpha = this.alpha * pulse;
+
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${this.hue}, 100%, 72%, ${alpha})`;
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (this.trail) {
+      ctx.beginPath();
+      ctx.strokeStyle =
+        `hsla(${this.hue}, 100%, 65%, ${alpha * 0.35})`;
+      ctx.lineWidth = this.size * 0.7;
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(
+        this.x - this.vx * 4,
+        this.y - this.vy * 4
+      );
+      ctx.stroke();
+    }
+  }
+}
+
+function createParticles() {
+  particles = Array.from(
+    { length: targetCount },
+    () => new Particle()
+  );
+
+  document.getElementById('particleStat').textContent =
+    particles.length;
+}
+
+function drawBlackHole() {
+  const x = pointer.x;
+  const y = pointer.y;
+
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Светещ акреционен диск
+  ctx.save();
+  ctx.rotate(time * 0.0008);
+
+  const gradient = ctx.createRadialGradient(
+    0, 0, 8, 0, 0, 85
+  );
+
+  gradient.addColorStop(0, '#000000');
+  gradient.addColorStop(0.2, '#05020f');
+  gradient.addColorStop(0.42, '#6315c8');
+  gradient.addColorStop(0.55, '#00cfff');
+  gradient.addColorStop(0.7, '#6327b8');
+  gradient.addColorStop(1, 'transparent');
+
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 90, 34, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  // Черният център
+  ctx.shadowBlur = 35;
+  ctx.shadowColor = '#8a36ff';
+
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(0, 0, 17, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#a653ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, 20, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawCenter() {
+  if (blackHole) return;
+
+  const glow = ctx.createRadialGradient(
+    cx, cy, 0, cx, cy, 180
+  );
+
+  glow.addColorStop(0, '#4d28ff20');
+  glow.addColorStop(0.4, '#007bff0a');
+  glow.addColorStop(1, 'transparent');
+
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Деликатни орбитални линии
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(time * 0.00005);
+
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.ellipse(
+      0, 0,
+      100 + i * 55,
+      30 + i * 24,
+      i * 0.6,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.strokeStyle = `rgba(70, 130, 255, ${0.07 - i * 0.015})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function animate(now) {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min((now - lastTime) / 16.67, 2);
+  lastTime = now;
+  time = now;
+  frame++;
+
+  if (frame % 20 === 0) {
+    fps = Math.round(1000 / Math.max(1, now - (now - 20 * 16.67)));
+    document.getElementById('fps').textContent =
+      Math.min(60, Math.max(1, fps));
+  }
+
+  if (!running) return;
+
+  // Полупрозрачно наслагване за светлинни опашки
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = blackHole
+    ? 'rgba(2, 1, 10, 0.20)'
+    : 'rgba(3, 4, 12, 0.14)';
+
+  ctx.fillRect(0, 0, W, H);
+
+  drawCenter();
+
+  // Additive blending за неоново сияние
+  ctx.globalCompositeOperation = 'lighter';
+
+  for (const p of particles) {
+    p.update(dt);
+    p.draw();
+  }
+
+  if (blackHole) {
+    drawBlackHole();
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+
+  document.getElementById('energy').textContent =
+    blackHole ? 'MAX' : Math.round(50 + gravity * 40) + '%';
+}
+
+function setMode(nextMode) {
+  mode = nextMode;
+  blackHole = nextMode === 'black';
+
+  document.getElementById('orbitBtn')
+    .classList.toggle('active', !blackHole);
+
+  document.getElementById('blackBtn')
+    .classList.toggle('active', blackHole);
+
+  document.getElementById('modeStat').textContent =
+    blackHole ? 'BLACK HOLE' : 'ORBIT';
+
+  document.getElementById('status').textContent =
+    blackHole ? 'СИНГУЛЯРНОСТ АКТИВНА' : 'СИСТЕМА АКТИВНА';
+}
+
+function movePointer(e) {
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = e.clientX - rect.left;
+  pointer.y = e.clientY - rect.top;
+  pointer.active = true;
+}
+
+canvas.addEventListener('pointermove', movePointer);
+
+canvas.addEventListener('pointerdown', e => {
+  movePointer(e);
+  setMode('black');
+});
+
+window.addEventListener('pointerup', () => {
+  if (mode === 'black') setMode('orbit');
+});
+
+document.getElementById('orbitBtn').onclick = () => {
+  setMode('orbit');
+};
+
+document.getElementById('blackBtn').onclick = () => {
+  setMode('black');
+};
+
+document.getElementById('gravity').oninput = e => {
+  gravity = Number(e.target.value) / 100;
+  document.getElementById('gravityValue').textContent =
+    e.target.value + '%';
+};
+
+document.getElementById('speed').oninput = e => {
+  speedFactor = Number(e.target.value) / 100;
+  document.getElementById('speedValue').textContent =
+    e.target.value + '%';
+};
+
+document.getElementById('count').oninput = e => {
+  targetCount = Number(e.target.value);
+  document.getElementById('countValue').textContent =
+    targetCount;
+
+  const difference = targetCount - particles.length;
+
+  if (difference > 0) {
+    for (let i = 0; i < difference; i++) {
+      particles.push(new Particle());
+    }
+  } else if (difference < 0) {
+    particles.length = targetCount;
+  }
+
+  document.getElementById('particleStat').textContent =
+    particles.length;
+};
+
+document.getElementById('pauseBtn').onclick = e => {
+  running = !running;
+  e.target.textContent = running ? 'Ⅱ Пауза' : '▶ Продължи';
+
+  if (running) {
+    lastTime = performance.now();
+  }
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  setMode('orbit');
+  createParticles();
+
+  ctx.fillStyle = '#03040c';
+  ctx.fillRect(0, 0, W, H);
+};
+
+window.addEventListener('resize', resize);
+
+resize();
+createParticles();
+requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>
